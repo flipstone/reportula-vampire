@@ -1,7 +1,8 @@
 require File.expand_path('../boot', __FILE__)
 
 require 'rails/all'
-require_relative '../../lib/reportula-vampire'
+$LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), %w(.. .. lib)))
+require 'reportula-vampire'
 
 # If you have a Gemfile, require the gems listed there, including any gems
 # you've limited to :test, :development, or :production.

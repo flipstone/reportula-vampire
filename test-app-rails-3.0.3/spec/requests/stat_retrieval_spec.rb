@@ -55,4 +55,24 @@ describe "stats retrieval" do
       ActiveSupport::JSON.decode(response.body)["measure"].should == "Foo Count"
     end
   end
+
+  describe "GET stats index" do
+    it "responds with success" do
+      get "/reportula-vampire/stats"
+      response.should be_success
+    end
+
+    it "lists all auto-model count urls" do
+      get "/reportula-vampire/stats"
+      locations = ActiveSupport::JSON.decode(response.body)["stat_locations"]
+      locations.should have(2).entries
+      locations.should include("/reportula-vampire/stats/foos/count")
+      locations.should include("/reportula-vampire/stats/bars/count")
+    end
+
+    it "sets Content-Type" do
+      get "/reportula-vampire/stats"
+      response["Content-Type"].should == "application/json"
+    end
+  end
 end

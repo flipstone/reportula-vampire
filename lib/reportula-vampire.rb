@@ -1,32 +1,25 @@
+require 'reportula/discovered_models'
+require 'reportula/apps/stat_index'
+require 'reportula/apps/model_count'
+require 'rack/mount'
+
 module Reportula
+  App = Rack::Builder.new do
+    map "/reportula-vampire" do
+      run(Rack::Mount::RouteSet.new do |set|
+        set.add_route Apps::StatIndex.new, { path_info: %r{\A/stats\Z} }
+        set.add_route Apps::ModelCount.new, { path_info: %r{\A/stats/(?<model_name>[a-zA-Z_][a-zA-Z0-9_]+)/count\Z} }
+      end)
+    end
+  end
+
   class Vampire
     def initialize(app)
-      @app = app
+      @cascade = Rack::Cascade.new([App, app])
     end
 
     def call(env)
-      if env["PATH_INFO"] =~ %r{\A/reportula-vampire/}
-        env["PATH_INFO"] =~ %r{/stats/([^/]+)/count}
-        model_class = begin
-                        $1.classify.constantize
-                      rescue NameError
-                        return ["404", {}, []]
-                      end
-
-        [
-          200,
-          {"Content-Type" => "application/json"},
-          [
-            {
-              value: model_class.count,
-              unit: model_class.name,
-              measure: "#{model_class} Count"
-            }.to_json
-          ]
-        ]
-      else
-        @app.call env
-      end
+      @cascade.call(env)
     end
   end
 end
