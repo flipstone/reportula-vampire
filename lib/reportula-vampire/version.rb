@@ -1,5 +1,5 @@
 module Reportula
-  module Vampire
+  class Vampire
     VERSION = "0.0.1"
   end
 end
